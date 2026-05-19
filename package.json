@@ -1,0 +1,30 @@
+{
+  "name": "apiendpoint",
+  "version": "1.0.0",
+  "description": "my api project",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/digitsmyanmar72/apiEndPoint.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/digitsmyanmar72/apiEndPoint/issues"
+  },
+  "homepage": "https://github.com/digitsmyanmar72/apiEndPoint#readme",
+  "dependencies": {
+    "apiendpoint": "file:",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "list": "^2.0.19",
+    "mysql2": "^3.18.0"
+  }
+}

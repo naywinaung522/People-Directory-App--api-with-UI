@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>People Directory - Authentication Required</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Auth Forms */
+        .auth-container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .auth-container h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            margin-bottom: -2px;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .success-message {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        /* Main App (hidden until logged in) */
+        .main-app {
+            display: none;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f56565;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+        }
+
+        /* Stats Cards */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Control Panel */
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .search-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .add-person-section {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .add-person-section input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+
+        .btn-success {
+            background: #48bb78;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+        }
+
+        .btn-danger {
+            background: #f56565;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        /* People Table */
+        .people-table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .people-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .people-table thead {
+            background: #667eea;
+            color: white;
+        }
+
+        .people-table th {
+            padding: 15px;
+            text-align: left;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .people-table th:hover {
+            background: #5a67d8;
+        }
+
+        .people-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .people-table tbody tr:hover {
+            background: #f7fafc;
+        }
+
+        .delete-btn {
+            background: #f56565;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .delete-btn:hover {
+            background: #e53e3e;
+        }
+
+        .loading, .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .people-table {
+                font-size: 0.9rem;
+            }
+            
+            .people-table th, .people-table td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Authentication Container -->
+        <div id="authContainer" class="auth-container">
+            <h2>👥 People Directory</h2>
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+                <button class="auth-tab" onclick="switchTab('register')">Register</button>
+            </div>
+            
+            <div id="loginForm" class="auth-form active">
+                <div id="loginError" class="error-message" style="display: none;"></div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUsername" placeholder="Enter username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter password">
+                </div>
+                <button class="btn" onclick="login()">Login</button>
+            </div>
+            
+            <div id="registerForm" class="auth-form">
+                <div id="registerError" class="error-message" style="display: none;"></div>
+                <div id="registerSuccess" class="success-message" style="display: none;"></div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="regUsername" placeholder="Choose username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword" placeholder="Choose password">
+                </div>
+                <button class="btn" onclick="register()">Register</button>
+            </div>
+        </div>
+
+        <!-- Main Application (shown after login) -->
+        <div id="mainApp" class="main-app">
+            <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+            
+            <div class="header">
+                <h1>👥 People Directory</h1>
+                <p>Manage your people database</p>
+            </div>
+
+            <div class="stats" id="stats"></div>
+
+            <div class="controls">
+                <div class="search-section">
+                    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search by name..." autocomplete="off">
+                    <button id="refreshBtn" class="btn-primary btn" onclick="fetchPeople()">🔄 Refresh</button>
+                </div>
+                
+                <div class="add-person-section">
+                    <input type="text" id="newName" placeholder="Name">
+                    <input type="number" id="newAge" placeholder="Age">
+                    <button class="btn-success btn" onclick="addPerson()">➕ Add Person</button>
+                </div>
+            </div>
+
+            <div class="people-table-container">
+                <table class="people-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortBy('name')">Name <span id="nameSort">↕️</span></th>
+                            <th onclick="sortBy('age')">Age <span id="ageSort">↕️</span></th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="3" class="loading">
+                                <div class="spinner"></div>
+                                Please login to view data...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+        let authToken = null;
+        let peopleData = [];
+        let filteredData = [];
+        let currentSort = { column: 'name', direction: 'asc' };
+        let searchTerm = '';
+
+        // Switch between login and register tabs
+        function switchTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const tabs = document.querySelectorAll('.auth-tab');
+            
+            if (tab === 'login') {
+                loginForm.classList.add('active');
+                registerForm.classList.remove('active');
+                tabs[0].classList.add('active');
+                tabs[1].classList.remove('active');
+            } else {
+                loginForm.classList.remove('active');
+                registerForm.classList.add('active');
+                tabs[0].classList.remove('active');
+                tabs[1].classList.add('active');
+            }
+            
+            // Clear messages
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('registerError').style.display = 'none';
+            document.getElementById('registerSuccess').style.display = 'none';
+        }
+
+        // Register function
+        async function register() {
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            
+            if (!username || !password) {
+                showRegisterError('Please enter both username and password');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showRegisterSuccess('Registration successful! Please login.');
+                    document.getElementById('regUsername').value = '';
+                    document.getElementById('regPassword').value = '';
+                    setTimeout(() => switchTab('login'), 2000);
+                } else {
+                    showRegisterError(data.error || 'Registration failed');
+                }
+            } catch (error) {
+                showRegisterError('Network error. Is the server running?');
+            }
+        }
+
+        // Login function
+        async function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!username || !password) {
+                showLoginError('Please enter both username and password');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('username', username);
+                    showMainApp();
+                    await fetchPeople();
+                } else {
+                    showLoginError(data.error || 'Login failed');
+                }
+            } catch (error) {
+                showLoginError('Network error. Is the server running?');
+            }
+        }
+
+        // Logout function
+        function logout() {
+            authToken = null;
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('username');
+            showAuthContainer();
+        }
+
+        // Show main app and hide auth container
+        function showMainApp() {
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+        }
+
+        // Show auth container and hide main app
+        function showAuthContainer() {
+            document.getElementById('authContainer').style.display = 'block';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // Error/Success message functions
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 3000);
+        }
+
+        function showRegisterError(message) {
+            const errorDiv = document.getElementById('registerError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 3000);
+        }
+
+        function showRegisterSuccess(message) {
+            const successDiv = document.getElementById('registerSuccess');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => successDiv.style.display = 'none', 3000);
+        }
+
+        // Fetch people from API
+        async function fetchPeople() {
+            if (!authToken) return;
+            
+            showLoading();
+            try {
+                const response = await fetch(`${API_URL}/people`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.status === 401 || response.status === 403) {
+                    logout();
+                    return;
+                }
+                
+                if (!response.ok) throw new Error('Failed to fetch people');
+                
+                peopleData = await response.json();
+                applyFiltersAndSort();
+                updateStats();
+            } catch (error) {
+                console.error('Error fetching people:', error);
+                showTableError('Failed to load people. Please try refreshing.');
+            }
+        }
+
+        // Add new person
+        async function addPerson() {
+            const name = document.getElementById('newName').value;
+            const age = document.getElementById('newAge').value;
+            
+            if (!name || !age) {
+                alert('Please enter both name and age');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/people`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ name, age: parseInt(age) })
+                });
+                
+                if (response.status === 401 || response.status === 403) {
+                    logout();
+                    return;
+                }
+                
+                if (response.ok) {
+                    document.getElementById('newName').value = '';
+                    document.getElementById('newAge').value = '';
+                    await fetchPeople();
+                } else {
+                    const error = await response.json();
+                    alert(error.error || 'Failed to add person');
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        }
+
+        // Delete person
+        async function deletePerson(id) {
+            if (!confirm('Are you sure you want to delete this person?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/people/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.status === 401 || response.status === 403) {
+                    logout();
+                    return;
+                }
+                
+                if (response.ok) {
+                    await fetchPeople();
+                } else {
+                    alert('Failed to delete person');
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        }
+
+        // Apply filters and sorting
+        function applyFiltersAndSort() {
+            let data = [...peopleData];
+            
+            if (searchTerm) {
+                data = data.filter(person => 
+                    person.name.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+            }
+            
+            data.sort((a, b) => {
+                let aVal = a[currentSort.column];
+                let bVal = b[currentSort.column];
+                
+                if (currentSort.column === 'name') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                
+                if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            filteredData = data;
+            renderTable();
+        }
+
+        // Render the table
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="empty-state">No people found 😕</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filteredData.map(person => `
+                <tr>
+                    <td>${escapeHtml(person.name)}</td>
+                    <td>${person.age}</td>
+                    <td><button class="delete-btn" onclick="deletePerson(${person.id})">Delete</button></td>
+                </tr>
+            `).join('');
+        }
+
+        // Update statistics
+        function updateStats() {
+            if (peopleData.length === 0) {
+                document.getElementById('stats').innerHTML = `
+                    <div class="stat-card">
+                        <h3>Total People</h3>
+                        <div class="number">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Average Age</h3>
+                        <div class="number">0</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const total = peopleData.length;
+            const avgAge = Math.round(peopleData.reduce((sum, p) => sum + p.age, 0) / total);
+            const youngest = Math.min(...peopleData.map(p => p.age));
+            const oldest = Math.max(...peopleData.map(p => p.age));
+            
+            const statsHtml = `
+                <div class="stat-card">
+                    <h3>Total People</h3>
+                    <div class="number">${total}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Average Age</h3>
+                    <div class="number">${avgAge}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Youngest</h3>
+                    <div class="number">${youngest}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Oldest</h3>
+                    <div class="number">${oldest}</div>
+                </div>
+            `;
+            document.getElementById('stats').innerHTML = statsHtml;
+        }
+
+        // Sort functionality
+        function sortBy(column) {
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'asc';
+            }
+            
+            // Update sort indicators
+            document.getElementById('nameSort').textContent = column === 'name' ? (currentSort.direction === 'asc' ? '↑' : '↓') : '↕️';
+            document.getElementById('ageSort').textContent = column === 'age' ? (currentSort.direction === 'asc' ? '↑' : '↓') : '↕️';
+            
+            applyFiltersAndSort();
+        }
+
+        // Helper functions
+        function showLoading() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '<tr><td colspan="3" class="loading"><div class="spinner"></div>Loading...</td></tr>';
+        }
+
+        function showTableError(message) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = `<tr><td colspan="3" class="empty-state">❌ ${message}</td></tr>`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Search functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    searchTerm = e.target.value;
+                    applyFiltersAndSort();
+                });
+            }
+            
+            // Check for existing token
+            const savedToken = localStorage.getItem('authToken');
+            if (savedToken) {
+                authToken = savedToken;
+                showMainApp();
+                fetchPeople();
+            }
+        });
+    </script>
+</body>
+</html>
